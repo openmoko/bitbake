@@ -42,6 +42,56 @@ class BBConfiguration( object ):
 
 
 #============================================================================#
+# clean_environment 
+#============================================================================#
+def clean_environment():
+    """
+    Create a pristine environment for bitbake. This will remove variables that
+    are not known and may influence the build in a negative way.
+    """
+    good_keys = [
+        "BBPATH",
+        "COLORTERM",
+        "DBUS_SESSION_BUS_ADDRESS",
+        "DESKTOP_SESSION",
+        "DESKTOP_STARTUP_ID",
+        "DISPLAY",
+        "GNOME_KEYRING_PID",
+        "GNOME_KEYRING_SOCKET",
+        "GPG_AGENT_INFO",
+        "GTK_RC_FILES",
+        "HOME",
+        "LANG",
+        "LOGNAME",
+        "PATH",
+        "PWD",
+        "SESSION_MANAGER",
+        "SHELL",
+        "SSH_AUTH_SOCK",
+        "TERM",
+        "USER",
+        "USERNAME",
+        "_",
+        "XAUTHORITY",
+        "XDG_DATA_DIRS",
+        "XDG_SESSION_COOKIE",
+    ]
+
+
+    removed_vars = []
+    for key in os.environ.keys():
+        if key in good_keys:
+            continue
+        
+        removed_vars.append(key)
+        os.unsetenv(key)
+        del os.environ[key]
+
+    if len(removed_vars):
+        bb.note("Removed the following variables from the environment:", ",".join(removed_vars))
+
+
+#============================================================================#
 # main
 #============================================================================#
 
@@ -105,6 +155,9 @@ Default BBFILES are the .bb files in the current directory.""" )
     parser.add_option( "-P", "--profile", help = "profile the command and print a report",
                action = "store_true", dest = "profile", default = False )
 
+    parser.add_option( "-S", "--sane-environment", help = """Do not clean the environment variables. Use this on your own risk.""",
+                action = "store_false", dest = "clean_environment", default = True)
+
     options, args = parser.parse_args(sys.argv)
 
     configuration = BBConfiguration(options)
@@ -112,6 +165,8 @@ Default BBFILES are the .bb files in the current directory.""" )
     configuration.pkgs_to_build.extend(args[1:])
 
     cooker = bb.cooker.BBCooker(configuration)
+    if options.clean_environment:
+        clean_environment()
 
     if configuration.profile:
         try:

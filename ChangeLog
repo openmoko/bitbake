@@ -85,6 +85,7 @@ Changes in BitBake 1.8.10:
 	- Add support for branches in git fetcher (Otavio Salvador, Michael Lauer)
 	- Make taskdata and runqueue errors more user friendly
 	- Add norecurse and fullpath options to cvs fetcher
+	- Create a prestine environment after parsing the configuration
 
 Changes in Bitbake 1.8.8:
 	- Rewrite svn fetcher to make adding extra operations easier 
